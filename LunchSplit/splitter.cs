@@ -16,7 +16,16 @@ public class Splitter
 {
     public decimal ComputeTip(decimal subtotal, TipMode mode, decimal tipInput )
     {
-        return 0m;
+        if (mode == TipMode.None)
+        {
+            return 0m;
+        }else if (mode == TipMode.Percent)
+        {
+            return (subtotal * tipInput) / 100;
+        }else
+        {
+            return tipInput;
+        }
     }
 
     public List<Share> CalculateShares(Bill bill, List<Attendee> attendeeList, RoundingMode roundingMode)
