@@ -23,3 +23,4 @@ public class Share
     public string Name { get; set; }
     public decimal Amount { get; set; }
 }
+
