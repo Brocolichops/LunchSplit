@@ -16,7 +16,7 @@ public class Splitter
 {
     public decimal ComputeTip(decimal subtotal, TipMode mode, decimal tipInput )
     {
-        throw new NotImplementedException();
+        return 0m;
     }
 
     public List<Share> CalculateShares(Bill bill, List<Attendee> attendeeList, RoundingMode roundingMode)
