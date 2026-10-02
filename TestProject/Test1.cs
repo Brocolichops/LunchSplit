@@ -172,4 +172,25 @@ public class SplitterTests
         Assert.IsFalse(result.IsValid);
     }
 
+    [TestMethod]
+    public void CalculateShares_EqualSplit_ApportionsEvenly()
+    {
+        var splitter = new Splitter();
+
+        var attendees = new List<Attendee>
+    {
+        new Attendee { Name = "A", Weight = 1, Included = true },
+        new Attendee { Name = "B", Weight = 1, Included = true },
+        new Attendee { Name = "C", Weight = 1, Included = true }
+    };
+
+        var bill = new Bill(90m, 0.10m, TipMode.None, 0m);
+
+        var result = splitter.CalculateShares(bill, attendees, RoundingMode.None);
+
+        Assert.AreEqual(33m, result[0].Amount);
+        Assert.AreEqual(33m, result[1].Amount);
+        Assert.AreEqual(33m, result[2].Amount);
+    }
+
 }
