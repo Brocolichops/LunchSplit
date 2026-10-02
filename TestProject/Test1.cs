@@ -153,4 +153,23 @@ public class SplitterTests
         Assert.IsTrue(result.IsValid);
     }
 
+    [TestMethod]
+    public void Validate_EmptyAttendeeCollection_ReturnsFail()
+    {
+        var validator = new BillValidator();
+
+        var bill = new Bill(
+            Subtotal: 100m,
+            Tax: 0.10m,
+            TipMode: TipMode.None,
+            TipInput: 0m
+        );
+
+        var attendees = new List<Attendee>(); 
+
+        var result = validator.Validate(bill, attendees);
+
+        Assert.IsFalse(result.IsValid);
+    }
+
 }

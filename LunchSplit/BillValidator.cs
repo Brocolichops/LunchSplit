@@ -9,6 +9,8 @@ namespace LunchSplit
     {
         public ValidationResult Validate(Bill bill, List<Attendee> attendees)
         {
+
+            if (attendees == null || attendees.Count == 0) return ValidationResult.Fail("No attendees");
             return ValidationResult.Ok();
         }
     }
