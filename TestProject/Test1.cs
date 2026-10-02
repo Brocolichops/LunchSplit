@@ -130,4 +130,27 @@ public class SplitterTests
 
         Assert.AreEqual(0, result.Count);
     }
+
+    [TestMethod]
+    public void Validate_CompleteBillDetails_ReturnsOk()
+    {
+        var validator = new BillValidator();
+
+        var bill = new Bill(
+            Subtotal: 100m,
+            Tax: 0.10m,
+            TipMode: TipMode.None,
+            TipInput: 0m
+        );
+
+        var attendees = new List<Attendee>
+    {
+        new Attendee { Name = "A", Weight = 1, Included = true }
+    };
+
+        var result = validator.Validate(bill, attendees);
+
+        Assert.IsTrue(result.IsValid);
+    }
+
 }
