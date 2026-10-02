@@ -8,20 +8,27 @@ public class Rounder
 {
     public List<Share> RoundShares(List<Share> rawShares, RoundingMode mode)
     {
-        if (mode == RoundingMode.None) return rawShares;
+        if (mode == RoundingMode.None)
+            return rawShares;
 
         if (mode == RoundingMode.Bankers)
         {
             var result = new List<Share>();
-
-            foreach(var share in rawShares)
+            foreach (var share in rawShares)
             {
                 decimal rounded = Math.Round(share.Amount, 2, MidpointRounding.ToEven);
-                result.Add(new Share
-                {
-                    Name = share.Name,
-                    Amount = rounded
-                });
+                result.Add(new Share { Name = share.Name, Amount = rounded });
+            }
+            return result;
+        }
+
+        if (mode == RoundingMode.RoundUp)
+        {
+            var result = new List<Share>();
+            foreach (var share in rawShares)
+            {
+                decimal rounded = Math.Ceiling(share.Amount * 100) / 100;
+                result.Add(new Share { Name = share.Name, Amount = rounded });
             }
             return result;
         }
@@ -29,4 +36,3 @@ public class Rounder
         throw new NotImplementedException();
     }
 }
-
