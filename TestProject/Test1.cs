@@ -98,5 +98,26 @@ public class SplitterTests
         Assert.AreEqual(10.33m, result[0].Amount);
     }
 
+    [TestMethod]
+    public void RoundShares_UnevenSplit_ReconcilesRemainder()
+    {
+        var rounder = new Rounder();
+
+        var rawShares = new List<Share>
+    {
+        new Share { Name = "A", Amount = 3.3333m },
+        new Share { Name = "B", Amount = 3.3333m },
+        new Share { Name = "C", Amount = 3.3333m }
+    };
+
+        var result = rounder.RoundShares(rawShares, RoundingMode.Bankers);
+
+        Assert.AreEqual(3.34m, result[0].Amount);
+        Assert.AreEqual(3.33m, result[1].Amount);
+        Assert.AreEqual(3.33m, result[2].Amount);
+
+        Assert.AreEqual(10m, result[0].Amount + result[1].Amount + result[2].Amount);
+    }
+
 
 }
