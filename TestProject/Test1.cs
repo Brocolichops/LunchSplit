@@ -119,5 +119,15 @@ public class SplitterTests
         Assert.AreEqual(10m, result[0].Amount + result[1].Amount + result[2].Amount);
     }
 
+    [TestMethod]
+    public void RoundShares_EmptyList_ReturnsEmpty()
+    {
+        var rounder = new Rounder();
 
+        var rawShares = new List<Share>();
+
+        var result = rounder.RoundShares(rawShares, RoundingMode.None);
+
+        Assert.AreEqual(0, result.Count);
+    }
 }

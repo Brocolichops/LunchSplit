@@ -8,6 +8,9 @@ public class Rounder
 {
     public List<Share> RoundShares(List<Share> rawShares, RoundingMode mode)
     {
+        if (rawShares.Count == 0)
+            return rawShares;
+
         if (mode == RoundingMode.None)
             return rawShares;
 
@@ -36,12 +39,11 @@ public class Rounder
                 roundedTotal += s.Amount;
 
             rawTotal = Math.Round(rawTotal, 2, MidpointRounding.ToEven);
+
             decimal difference = rawTotal - roundedTotal;
 
             if (difference != 0)
-            { 
                 result[0].Amount += difference;
-            }
 
             return result;
         }
