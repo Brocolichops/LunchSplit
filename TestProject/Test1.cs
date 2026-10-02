@@ -30,4 +30,23 @@ public class SplitterTests
 
         Assert.AreEqual(12, tip);
     }
-}
+
+
+[TestMethod]
+    public void RoundShares_NoRounding_PreservesRawDecimals()
+    {
+        var rounder = new Rounder();
+
+        var rawShares = new List<Share>
+    {
+        new Share { Name = "A", Amount = 10.123m },
+        new Share { Name = "B", Amount = 20.456m }
+    };
+
+        var result = rounder.RoundShares(rawShares, RoundingMode.None);
+
+        Assert.AreEqual(10.123m, result[0].Amount);
+        Assert.AreEqual(20.456m, result[1].Amount);
+    }
+
+    }
