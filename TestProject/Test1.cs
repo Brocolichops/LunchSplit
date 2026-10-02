@@ -332,5 +332,50 @@ public class SplitterTests
         Assert.IsTrue(receipt.Contains("Attendees: 2"));
     }
 
+    [TestMethod]
+    public void Format_CsvReceiptExporter_MatchesSchema()
+    {
+        var bill = new Bill(100m, 0.13m, TipMode.Percent, 15m);
+
+        var shares = new List<Share>
+    {
+        new Share { Name = "A", Amount = 64m },
+        new Share { Name = "B", Amount = 64m }
+    };
+
+        var exporter = new CsvReceiptExporter();
+
+        string csv = exporter.Format(bill, shares);
+
+        Assert.AreEqual(
+            "Subtotal,Tax,Tip,Total\n100.00,13.00,15.00,128.00\nA,64.00\nB,64.00\n",
+            csv
+        );
+    }
+
+    [TestMethod]
+    public void CalculateShares_PaymentRequest_ValidatesStripeMock()
+    {
+        var bill = new Bill(100m, 0.13m, TipMode.Percent, 15m);
+
+        var attendees = new List<Attendee>
+    {
+        new Attendee { Name = "A", Weight = 1, Included = true },
+        new Attendee { Name = "B", Weight = 1, Included = true }
+    };
+
+        var splitter = new Splitter();
+        var shares = splitter.CalculateShares(bill, attendees, RoundingMode.None);
+
+        var mockStripe = new MockStripeGateway();
+        var processor = new PaymentRequestProcessor(mockStripe);
+
+        processor.Process(shares);
+
+        Assert.AreEqual(2, mockStripe.Charges.Count);
+        Assert.AreEqual(64m, mockStripe.Charges[0].Amount);
+        Assert.AreEqual(64m, mockStripe.Charges[1].Amount);
+    }
+
 
 }
