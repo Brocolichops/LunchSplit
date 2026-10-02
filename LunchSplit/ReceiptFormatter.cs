@@ -21,6 +21,12 @@ namespace LunchSplit
 
             var sb = new StringBuilder();
 
+            sb.AppendLine("Receipt");
+
+            sb.AppendLine($"Date: {DateTime.Now}");
+            sb.AppendLine($"Attendees: {shares.Count}");
+            sb.AppendLine();
+
             sb.AppendLine($"Subtotal: {bill.Subtotal:F2}");
             sb.AppendLine($"Tax: {taxAmount:F2}");
             sb.AppendLine($"Tip: {tipAmount:F2}");
@@ -35,4 +41,5 @@ namespace LunchSplit
             return sb.ToString();
         }
     }
+
 }

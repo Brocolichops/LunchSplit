@@ -313,6 +313,24 @@ public class SplitterTests
         Assert.IsTrue(receipt.Contains("A: 64.00"));
         Assert.IsTrue(receipt.Contains("B: 64.00"));
     }
+    [TestMethod]
+    public void Format_ReceiptOutput_ContainsRequiredMetadata()
+    {
+        var bill = new Bill(100m, 0.13m, TipMode.Percent, 15m);
+
+        var shares = new List<Share>
+    {
+        new Share { Name = "A", Amount = 64m },
+        new Share { Name = "B", Amount = 64m }
+    };
+
+        var formatter = new ReceiptFormatter();
+
+        string receipt = formatter.Format(bill, shares);
+
+        Assert.IsTrue(receipt.Contains("Date:"));
+        Assert.IsTrue(receipt.Contains("Attendees: 2"));
+    }
 
 
 }
