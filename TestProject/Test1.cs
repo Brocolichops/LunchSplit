@@ -32,7 +32,7 @@ public class SplitterTests
     }
 
 
-[TestMethod]
+    [TestMethod]
     public void RoundShares_NoRounding_PreservesRawDecimals()
     {
         var rounder = new Rounder();
@@ -49,4 +49,22 @@ public class SplitterTests
         Assert.AreEqual(20.456m, result[1].Amount);
     }
 
+ 
+
+[TestMethod]
+    public void RoundShares_BankersRounding_RoundsToNearestEven()
+    {
+        var rounder = new Rounder();
+
+        var rawShares = new List<Share>
+    {
+        new Share { Name = "A", Amount = 10.325m },
+        new Share { Name = "B", Amount = 10.335m }
+    };
+
+        var result = rounder.RoundShares(rawShares, RoundingMode.Bankers);
+
+        Assert.AreEqual(10.32m, result[0].Amount);
+        Assert.AreEqual(10.34m, result[1].Amount);
     }
+}
