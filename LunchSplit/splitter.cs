@@ -30,6 +30,27 @@ public class Splitter
 
     public List<Share> CalculateShares(Bill bill, List<Attendee> attendeeList, RoundingMode roundingMode)
     {
-        throw new NotImplementedException();
+        // Filter included attendees
+        var included = attendeeList.Where(a => a.Included).ToList();
+
+        // M4-17: Equal split among included attendees
+        decimal tip = ComputeTip(bill.Subtotal, bill.TipMode, bill.TipInput);
+        decimal total = bill.Subtotal + bill.Tax + tip;
+
+        decimal eachShare = total / included.Count;
+
+        var result = new List<Share>();
+
+        foreach (var attendee in included)
+        {
+            result.Add(new Share
+            {
+                Name = attendee.Name,
+                Amount = eachShare
+            });
+        }
+
+        return result;
     }
+
 }
