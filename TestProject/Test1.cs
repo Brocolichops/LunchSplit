@@ -83,4 +83,20 @@ public class SplitterTests
         Assert.AreEqual(10.34m, result[0].Amount);
     }
 
+    [TestMethod]
+    public void RoundShares_RoundDown_AppliesFloorToCents()
+    {
+        var rounder = new Rounder();
+
+        var rawShares = new List<Share>
+    {
+        new Share { Name = "A", Amount = 10.339m }
+    };
+
+        var result = rounder.RoundShares(rawShares, RoundingMode.RoundDown);
+
+        Assert.AreEqual(10.33m, result[0].Amount);
+    }
+
+
 }

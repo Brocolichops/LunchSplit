@@ -33,6 +33,17 @@ public class Rounder
             return result;
         }
 
+        if (mode == RoundingMode.RoundDown)
+        {
+            var result = new List<Share>();
+            foreach (var share in rawShares)
+            {
+                decimal rounded = Math.Floor(share.Amount * 100) / 100;
+                result.Add(new Share { Name = share.Name, Amount = rounded });
+            }
+            return result;
+        }
+
         throw new NotImplementedException();
     }
 }
