@@ -214,5 +214,105 @@ public class SplitterTests
         Assert.AreEqual(49.5m, result[2].Amount);
     }
 
+    [TestMethod]
+    public void CalculateShares_ExcludedAttendee_ApportionsZero()
+    {
+        var splitter = new Splitter();
+
+        var attendees = new List<Attendee>
+    {
+        new Attendee { Name = "A", Weight = 1, Included = true },
+        new Attendee { Name = "B", Weight = 1, Included = false }
+    };
+
+        var bill = new Bill(90m, 0.10m, TipMode.None, 0m);
+
+        var result = splitter.CalculateShares(bill, attendees, RoundingMode.None);
+
+        Assert.AreEqual(2, result.Count);
+
+        Assert.AreEqual("A", result[0].Name);
+        Assert.AreEqual(99m, result[0].Amount);   
+
+        Assert.AreEqual("B", result[1].Name);
+        Assert.AreEqual(0m, result[1].Amount);    
+    }
+
+    [TestMethod]
+    public void CalculateShares_TaxAndPercentTip_ApportionsTotal()
+    {
+        var splitter = new Splitter();
+
+        var attendees = new List<Attendee>
+    {
+        new Attendee { Name = "A", Weight = 1, Included = true },
+        new Attendee { Name = "B", Weight = 1, Included = true }
+    };
+
+        var bill = new Bill(
+            Subtotal: 100m,
+            Tax: 0.13m,          // 13% tax
+            TipMode: TipMode.Percent,
+            TipInput: 15m        // 15% tip
+        );
+
+        var result = splitter.CalculateShares(bill, attendees, RoundingMode.None);
+
+        Assert.AreEqual(2, result.Count);
+
+        Assert.AreEqual(64m, result[0].Amount);
+        Assert.AreEqual(64m, result[1].Amount);
+    }
+
+    [TestMethod]
+    public void CalculateShares_TaxAndFixedTip_ApportionsTotal()
+    {
+        var splitter = new Splitter();
+
+        var attendees = new List<Attendee>
+    {
+        new Attendee { Name = "A", Weight = 1, Included = true },
+        new Attendee { Name = "B", Weight = 1, Included = true }
+    };
+
+        var bill = new Bill(
+            Subtotal: 100m,
+            Tax: 0.13m,          // 13% tax
+            TipMode: TipMode.Fixed,
+            TipInput: 20m        // $20 fixed tip
+        );
+
+        var result = splitter.CalculateShares(bill, attendees, RoundingMode.None);
+
+        Assert.AreEqual(2, result.Count);
+
+        Assert.AreEqual(66.5m, result[0].Amount);
+        Assert.AreEqual(66.5m, result[1].Amount);
+    }
+
+    [TestMethod]
+    public void Format_DefaultBillReceipt_ContainsLineItems()
+    {
+        var bill = new Bill(100m, 0.13m, TipMode.Percent, 15m);
+
+        var shares = new List<Share>
+    {
+        new Share { Name = "A", Amount = 64m },
+        new Share { Name = "B", Amount = 64m }
+    };
+
+        var formatter = new ReceiptFormatter();
+
+        string receipt = formatter.Format(bill, shares);
+
+        Assert.IsTrue(receipt.Contains("Subtotal: 100.00"));
+        Assert.IsTrue(receipt.Contains("Tax: 13.00"));
+        Assert.IsTrue(receipt.Contains("Tip: 15.00"));
+        Assert.IsTrue(receipt.Contains("Total: 128.00"));
+
+        Assert.IsTrue(receipt.Contains("A: 64.00"));
+        Assert.IsTrue(receipt.Contains("B: 64.00"));
+    }
+
 
 }

@@ -36,34 +36,51 @@ public class Splitter
         decimal tipAmount = ComputeTip(bill.Subtotal, bill.TipMode, bill.TipInput);
         decimal total = bill.Subtotal + taxAmount + tipAmount;
 
+        Dictionary<string, decimal> includedAmounts = new Dictionary<string, decimal>();
+
         bool allWeightsEqual = included.All(a => a.Weight == included[0].Weight);
 
         if (allWeightsEqual)
         {
-            decimal eachShare = total / included.Count;
-            eachShare = Math.Round(eachShare, 2, MidpointRounding.ToEven);
+            decimal eachShare = Math.Round(total / included.Count, 2, MidpointRounding.ToEven);
 
-            return included.Select(a => new Share
+            foreach (var a in included)
+                includedAmounts[a.Name] = eachShare;
+        }
+        else
+        {
+            decimal totalWeight = included.Sum(a => a.Weight);
+
+            foreach (var a in included)
             {
-                Name = a.Name,
-                Amount = eachShare
-            }).ToList();
+                decimal portion = (a.Weight / totalWeight) * total;
+                portion = Math.Round(portion, 2, MidpointRounding.ToEven);
+                includedAmounts[a.Name] = portion;
+            }
         }
 
-        decimal totalWeight = included.Sum(a => a.Weight);
+        var result = new List<Share>();
 
-        return included.Select(a =>
+        foreach (var attendee in attendeeList)
         {
-            decimal portion = (a.Weight / totalWeight) * total;
-            portion = Math.Round(portion, 2, MidpointRounding.ToEven);
-
-            return new Share
+            if (!attendee.Included)
             {
-                Name = a.Name,
-                Amount = portion
-            };
-        }).ToList();
+                result.Add(new Share
+                {
+                    Name = attendee.Name,
+                    Amount = 0m
+                });
+            }
+            else
+            {
+                result.Add(new Share
+                {
+                    Name = attendee.Name,
+                    Amount = includedAmounts[attendee.Name]
+                });
+            }
+        }
+
+        return result;
     }
-
-
 }
