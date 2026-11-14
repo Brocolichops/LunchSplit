@@ -72,4 +72,28 @@ public class PaymentProcessorMoqTests
         Assert.AreEqual("INVALID_AMOUNT", result.ErrorCode);
         processor.Verify(payment => payment.ProcessPaymentAsync(It.IsAny<PaymentRequest>()), Times.Never);
     }
+
+    [TestMethod]
+    public async Task M3_06_FourPaymentBatch_InvokesProcessorExactlyFourTimes()
+    {
+        var processor = new Mock<IPaymentProcessor>();
+        processor
+            .Setup(payment => payment.ProcessPaymentAsync(It.IsAny<PaymentRequest>()))
+            .ReturnsAsync(new PaymentResult(true, "payment-id"));
+        var manager = new PaymentManager(processor.Object);
+        var requests = Enumerable.Range(1, 4)
+            .Select(index => new PaymentRequest(
+                Amount: index * 10m,
+                CurrencyCode: "CAD",
+                IdempotencyKey: $"m3-06-{index}",
+                CardNonce: "cnon:card-nonce-ok"))
+            .ToArray();
+
+        var results = await manager.ProcessBatchAsync(requests);
+
+        Assert.AreEqual(4, results.Count);
+        processor.Verify(
+            payment => payment.ProcessPaymentAsync(It.IsAny<PaymentRequest>()),
+            Times.Exactly(4));
+    }
 }

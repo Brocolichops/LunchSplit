@@ -34,4 +34,18 @@ public sealed class PaymentManager
                 exception);
         }
     }
+
+    public async Task<IReadOnlyList<PaymentResult>> ProcessBatchAsync(
+        IEnumerable<PaymentRequest> requests)
+    {
+        ArgumentNullException.ThrowIfNull(requests);
+
+        var results = new List<PaymentResult>();
+        foreach (var request in requests)
+        {
+            results.Add(await ProcessPaymentAsync(request));
+        }
+
+        return results;
+    }
 }
