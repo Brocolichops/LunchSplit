@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LunchSplit\LunchSplit.csproj" />
+    <ProjectReference Include="..\LunchSplit.Infrastructure\LunchSplit.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
