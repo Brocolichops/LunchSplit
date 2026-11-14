@@ -99,4 +99,27 @@ public class SquareSandboxTests
         Assert.IsTrue(secondResult.IsSuccess, secondResult.ErrorMessage);
         Assert.AreEqual(firstResult.TransactionId, secondResult.TransactionId);
     }
+
+    [TestMethod]
+    [TestCategory("Integration")]
+    public async Task M3_10_SandboxPaymentStatus_ReturnsCompleted()
+    {
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("SQUARE_SANDBOX_ACCESS_TOKEN"))
+            || string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("SQUARE_SANDBOX_LOCATION_ID")))
+        {
+            Assert.Inconclusive("Square Sandbox environment variables are required for M3-10.");
+        }
+
+        var service = new SquarePaymentService();
+        var paymentResult = await service.ProcessPaymentAsync(new PaymentRequest(
+            Amount: 1.00m,
+            CurrencyCode: "CAD",
+            IdempotencyKey: $"m3-10-{Guid.NewGuid()}",
+            CardNonce: "cnon:card-nonce-ok"));
+
+        Assert.IsTrue(paymentResult.IsSuccess, paymentResult.ErrorMessage);
+        var status = await service.GetTransactionStatusAsync(paymentResult.TransactionId!);
+
+        Assert.AreEqual("COMPLETED", status.Status);
+    }
 }
