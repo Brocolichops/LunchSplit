@@ -74,4 +74,29 @@ public class SquareSandboxTests
         Assert.IsFalse(result.IsSuccess);
         Assert.IsFalse(string.IsNullOrWhiteSpace(result.ErrorCode));
     }
+
+    [TestMethod]
+    [TestCategory("Integration")]
+    public async Task M3_09_DuplicateIdempotencyKey_ReturnsSameTransaction()
+    {
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("SQUARE_SANDBOX_ACCESS_TOKEN"))
+            || string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("SQUARE_SANDBOX_LOCATION_ID")))
+        {
+            Assert.Inconclusive("Square Sandbox environment variables are required for M3-09.");
+        }
+
+        var service = new SquarePaymentService();
+        var request = new PaymentRequest(
+            Amount: 1.00m,
+            CurrencyCode: "CAD",
+            IdempotencyKey: $"m3-09-{Guid.NewGuid()}",
+            CardNonce: "cnon:card-nonce-ok");
+
+        var firstResult = await service.ProcessPaymentAsync(request);
+        var secondResult = await service.ProcessPaymentAsync(request);
+
+        Assert.IsTrue(firstResult.IsSuccess, firstResult.ErrorMessage);
+        Assert.IsTrue(secondResult.IsSuccess, secondResult.ErrorMessage);
+        Assert.AreEqual(firstResult.TransactionId, secondResult.TransactionId);
+    }
 }
