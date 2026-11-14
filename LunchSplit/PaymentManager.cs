@@ -13,6 +13,16 @@ public sealed class PaymentManager
 
     public async Task<PaymentResult> ProcessPaymentAsync(PaymentRequest request)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (request.Amount <= 0)
+        {
+            return new PaymentResult(
+                IsSuccess: false,
+                ErrorCode: "INVALID_AMOUNT",
+                ErrorMessage: "Payment amount must be greater than zero.");
+        }
+
         try
         {
             return await paymentProcessor.ProcessPaymentAsync(request);

@@ -54,4 +54,22 @@ public class PaymentProcessorMoqTests
                 && actual.IdempotencyKey == "m3-04-idempotency-key"
                 && actual.CardNonce == "cnon:card-nonce-ok")), Times.Once);
     }
+
+    [TestMethod]
+    public async Task M3_05_ZeroDollarPayment_DoesNotInvokeProcessor()
+    {
+        var processor = new Mock<IPaymentProcessor>();
+        var manager = new PaymentManager(processor.Object);
+        var request = new PaymentRequest(
+            Amount: 0m,
+            CurrencyCode: "CAD",
+            IdempotencyKey: "m3-05-idempotency-key",
+            CardNonce: "cnon:card-nonce-ok");
+
+        var result = await manager.ProcessPaymentAsync(request);
+
+        Assert.IsFalse(result.IsSuccess);
+        Assert.AreEqual("INVALID_AMOUNT", result.ErrorCode);
+        processor.Verify(payment => payment.ProcessPaymentAsync(It.IsAny<PaymentRequest>()), Times.Never);
+    }
 }
