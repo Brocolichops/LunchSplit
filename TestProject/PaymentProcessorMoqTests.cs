@@ -96,4 +96,33 @@ public class PaymentProcessorMoqTests
             payment => payment.ProcessPaymentAsync(It.IsAny<PaymentRequest>()),
             Times.Exactly(4));
     }
+
+    [TestMethod]
+    public async Task M3_07_PartialBatchFailure_ReturnsTwoSuccessesAndOneFailure()
+    {
+        var processor = new Mock<IPaymentProcessor>();
+        processor
+            .Setup(payment => payment.ProcessPaymentAsync(It.IsAny<PaymentRequest>()))
+            .Returns((PaymentRequest request) => Task.FromResult(
+                request.IdempotencyKey == "m3-07-2"
+                    ? new PaymentResult(false, ErrorCode: "CARD_DECLINED")
+                    : new PaymentResult(true, TransactionId: request.IdempotencyKey)));
+        var manager = new PaymentManager(processor.Object);
+        var requests = Enumerable.Range(1, 3)
+            .Select(index => new PaymentRequest(
+                Amount: 10m,
+                CurrencyCode: "CAD",
+                IdempotencyKey: $"m3-07-{index}",
+                CardNonce: "cnon:card-nonce-ok"))
+            .ToArray();
+
+        var results = await manager.ProcessBatchAsync(requests);
+
+        Assert.AreEqual(2, results.Count(result => result.IsSuccess));
+        Assert.AreEqual(1, results.Count(result => !result.IsSuccess));
+        Assert.AreEqual("CARD_DECLINED", results.Single(result => !result.IsSuccess).ErrorCode);
+        processor.Verify(
+            payment => payment.ProcessPaymentAsync(It.IsAny<PaymentRequest>()),
+            Times.Exactly(3));
+    }
 }
