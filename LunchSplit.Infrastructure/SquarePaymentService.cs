@@ -74,9 +74,15 @@ public sealed class SquarePaymentService : IPaymentProcessor
         catch (SquareApiException exception)
         {
             var error = exception.Errors?.FirstOrDefault();
+            var errorCode = error is null ? null : error.Code.ToString();
+            if (errorCode == "GENERIC_DECLINE")
+            {
+                errorCode = "CARD_DECLINED";
+            }
+
             return new PaymentResult(
                 IsSuccess: false,
-                ErrorCode: error is null ? null : error.Code.ToString(),
+                ErrorCode: errorCode,
                 ErrorMessage: error?.Detail ?? exception.Message);
         }
     }

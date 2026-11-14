@@ -28,4 +28,27 @@ public class SquareSandboxTests
         Assert.IsTrue(result.IsSuccess, result.ErrorMessage);
         Assert.IsFalse(string.IsNullOrWhiteSpace(result.TransactionId));
     }
+
+    [TestMethod]
+    [TestCategory("Integration")]
+    public async Task M3_02_SandboxDeclinedNonce_ReturnsCardDeclined()
+    {
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("SQUARE_SANDBOX_ACCESS_TOKEN"))
+            || string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("SQUARE_SANDBOX_LOCATION_ID")))
+        {
+            Assert.Inconclusive("Square Sandbox environment variables are required for M3-02.");
+        }
+
+        var service = new SquarePaymentService();
+        var request = new PaymentRequest(
+            Amount: 1.00m,
+            CurrencyCode: "CAD",
+            IdempotencyKey: Guid.NewGuid().ToString(),
+            CardNonce: "cnon:card-nonce-declined");
+
+        var result = await service.ProcessPaymentAsync(request);
+
+        Assert.IsFalse(result.IsSuccess);
+        Assert.AreEqual("CARD_DECLINED", result.ErrorCode);
+    }
 }
